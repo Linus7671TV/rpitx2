@@ -38,6 +38,7 @@ struct {
     int ab;
     char ps[PS_LENGTH];
     char rt[RT_LENGTH];
+    char ptyn[9];
     int af[100];
     int di;
 } rds_params = { 0 };
@@ -120,6 +121,7 @@ void get_rds_group(int *buffer, int stereo, int ct_clock_enabled) { //ptyn?
     static int state = 0;
     static int ps_state = 0;
     static int rt_state = 0;
+	static int ptyn_state = 0;
     static int af_state = 0;
     uint16_t blocks[GROUP_LENGTH] = {rds_params.pi, 0, 0, 0};
     
@@ -146,22 +148,45 @@ void get_rds_group(int *buffer, int stereo, int ct_clock_enabled) { //ptyn?
             blocks[3] = rds_params.ps[ps_state*2] << 8 | rds_params.ps[ps_state*2+1];
             ps_state++;
             if(ps_state >= 4) ps_state = 0;
-        } else if(state < 8) { // Type 2A groups
+                } else if(state < 8) { // Type 2A groups (Radiotext)
             blocks[1] = 0x2000 | rds_params.tp << 10 | rds_params.pty << 5 | rds_params.ab << 4 | rt_state;
             blocks[2] = rds_params.rt[rt_state*4+0] << 8 | rds_params.rt[rt_state*4+1];
             blocks[3] = rds_params.rt[rt_state*4+2] << 8 | rds_params.rt[rt_state*4+3];
             rt_state++;
             if(rt_state >= 16) rt_state = 0;
-        } else {
-            blocks[1] = 0x1000 | rds_params.tp << 10 | rds_params.pty << 5;
-            blocks[2] = rds_params.ecc; // Things like LIC would require the first 1-3 bits set, but ecc has just 0s there
-            // block 3 unused
-        }
+
+            } else if(state == 8) { // Type 10A PTYN
+
+                blocks[1] = 0xA000 |
+                            (rds_params.tp << 10) |
+                            (rds_params.pty << 5) |
+                            (ptyn_state & 0x03);
+
+                blocks[2] = rds_params.ptyn[ptyn_state * 4] << 8 |
+                            rds_params.ptyn[ptyn_state * 4 + 1];
+
+                blocks[3] = rds_params.ptyn[ptyn_state * 4 + 2] << 8 |
+                            rds_params.ptyn[ptyn_state * 4 + 3];
+
+                ptyn_state++;
+
+                if(ptyn_state >= 2)
+                    ptyn_state = 0;
+
+            } else {
+               blocks[1] = 0x1000 | rds_params.tp << 10 | rds_params.pty << 5;
+               blocks[2] = rds_params.ecc;
+            }
     
         state++;
-        if(state >= 8 && rds_params.ecc == 0) state = 0;
-        if(state >= 9 && rds_params.ecc != 0) state = 0;
-    }
+
+        if(state >= 9 && rds_params.ecc == 0)
+            state = 0;
+
+        if(state >= 10 && rds_params.ecc != 0)
+            state = 0;
+	
+	}
     
     // Calculate the checkword for each block and emit the bits
     for(int i=0; i<GROUP_LENGTH; i++) {
@@ -259,6 +284,15 @@ void set_rds_ps(char *ps) {
     strncpy(rds_params.ps, ps, 8);
     for(int i=0; i<8; i++) {
         if(rds_params.ps[i] == 0) rds_params.ps[i] = 32;
+    }
+}
+
+void set_rds_ptyn(char *ptyn) {
+    strncpy(rds_params.ptyn, ptyn, 8);
+
+    for(int i = 0; i < 8; i++) {
+        if(rds_params.ptyn[i] == 0)
+            rds_params.ptyn[i] = ' ';
     }
 }
 
