@@ -184,8 +184,10 @@ now you know what you can pass as the args to the program, but theres a pipe sti
 `COM` - toggle, like rds but it doesnt toggle the rds, it does toggle the COMPRESSOR<br>
 `CMG` - change compressor max gain recip<br>
 `LIM` - same as that arg<br>
-`ECC` - sets the EXTENDED COUNTRY CODE, i don't know why would you need this, but it's here, look at a RDS standard like the [EN50067](https://flerken.zapto.org:8440/EN50067_RDS_Standard.pdf) and look at page 71
-<br>
+`ECC` - sets the EXTENDED COUNTRY CODE, i don't know why would you need this, but it's here, look at a RDS standard like the [EN50067](https://flerken.zapto.org:8440/EN50067_RDS_Standard.pdf) and look at page 71<br>
+`PTN` - sets Program Type Name / PTYN during runtime<br>
+`LIC` - same as that arg<br>
+
 and thats all, and remember kids dont pirate
 
 ## Features
