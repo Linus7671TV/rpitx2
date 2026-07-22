@@ -28,6 +28,8 @@
 #define CONTROL_PIPE_COMPRESSORMAXGAINRECIP_SET 21
 #define CONTROL_PIPE_LIMITERTHRESHOLD_SET 22
 #define CONTROL_PIPE_GENERIC_SET 23
+#define CONTROL_PIPE_PTYN_SET 24
+#define CONTROL_PIPE_LIC_SET 25
 
 typedef struct {
     int res;
@@ -38,3 +40,4 @@ typedef struct {
 extern int open_control_pipe(char *filename);
 extern int close_control_pipe();
 extern ResultAndArg poll_control_pipe(int log);
+
