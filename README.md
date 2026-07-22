@@ -162,8 +162,9 @@ if you have a arg with no argume... wait what args with args? anyways like the i
 `-preemphasis` - you can enter 0 or off for disabled, or us (75μs), default is 50μs, you can also enter any num and have that μs of pre-emp, (example: `-preemphasis us`, `-preemphasis 22`)<br>
 `-af` - same as pifmadv<br>
 `-rdsvolume` - rds volume, so how many times is the rds "louder", this can potentially increase rds range<br>
-`-limiterthreshold` - limiter threshold, limits to 10, i think that its in linear ratio, so the algorithm to convert from db is gonna be 10 ** (db/20) (actually its pcm value)<br><br>
-`-ecc` - see the control pipe entry
+`-limiterthreshold` - limiter threshold, limits to 10, i think that its in linear ratio, so the algorithm to convert from db is gonna be 10 ** (db/20) (actually its pcm value)<br>
+`-ecc` - see the control pipe entry<br>
+`-ptyn` - sets the Program Type Name / PTYN (control pipe entry coming soon)
 
 now you know what you can pass as the args to the program, but theres a pipe still, it wont include the ones in pifmadv or pifmrds:<br>
 `PI` - you can change pi code while runtime, useful when you forgot to set a pi code, but you probably won't care about it<br>
