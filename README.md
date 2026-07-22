@@ -164,7 +164,7 @@ if you have a arg with no argume... wait what args with args? anyways like the i
 `-rdsvolume` - rds volume, so how many times is the rds "louder", this can potentially increase rds range<br>
 `-limiterthreshold` - limiter threshold, limits to 10, i think that its in linear ratio, so the algorithm to convert from db is gonna be 10 ** (db/20) (actually its pcm value)<br>
 `-ecc` - see the control pipe entry<br>
-`-lic` - sets the Language Identification Code / LIC (note: you must enter the code as a hex number)
+`-lic` - sets the Language Identification Code / LIC (note: you must enter the code as a hex number)<br>
 `-ptyn` - sets the Program Type Name / PTYN
 
 now you know what you can pass as the args to the program, but theres a pipe still, it wont include the ones in pifmadv or pifmrds:<br>
