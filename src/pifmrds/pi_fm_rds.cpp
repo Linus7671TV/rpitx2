@@ -44,8 +44,10 @@ typedef struct tx_data {
     char *audio_file;
     uint16_t pi;
     uint16_t ecc;
+    uint16_t lic; // Added LIC
     char *ps;
     char *rt;
+    char *ptyn;
     char *control_pipe;
     uint8_t pty;
     int af_array[100];
@@ -86,7 +88,7 @@ int tx(tx_data *data) {
     
     // Data structures for baseband data
     float audio_data[DATA_SIZE];
-	float devfreq[DATA_SIZE];
+    float devfreq[DATA_SIZE];
     int data_len = 0;
     int data_index = 0;
 
@@ -113,8 +115,10 @@ int tx(tx_data *data) {
     char myps[9] = {0};
     set_rds_pi(data->pi);
     set_rds_ecc(data->ecc);
+    set_rds_lic(data->lic); // Added LIC initialization
     set_rds_ps(data->ps);
     set_rds_rt(data->rt);
+    set_rds_ptyn(data->ptyn);
     set_rds_pty(data->pty);
     set_rds_ab(0);
     set_rds_ms(1); // yes
@@ -131,8 +135,9 @@ int tx(tx_data *data) {
         if(drds == 1) {
             printf("RDS Disabled (you can enable with control fifo with the RDS command)\n");
         } else {
-            printf("PI: %04X, ECC: %02X, PS: \"%s\".\n", data->pi, data->ecc, data->ps);
+            printf("PI: %04X, ECC: %02X, LIC: %02X, PS: \"%s\".\n", data->pi, data->ecc, data->lic, data->ps);
             printf("RT: \"%s\"\n", data->rt);
+            printf("PTYN: \"%s\"\n", data->ptyn);
 
             if(data->af_array[0]) {
                 set_rds_af(data->af_array);
@@ -163,7 +168,7 @@ int tx(tx_data *data) {
     deviation_scale_factor=  0.1 * (data->deviation);
     int paused = 0;
     for (;;)
-	{
+    {
         if(data->control_pipe) {
             ResultAndArg pollResult = poll_control_pipe(data->log);
             if(pollResult.res == CONTROL_PIPE_RDS_SET) {
@@ -218,7 +223,7 @@ int tx(tx_data *data) {
             devfreq[i] = audio_data[i]*deviation_scale_factor;
         }
         fmmod->SetFrequencySamples(devfreq,data_len);
-	}
+    }
     return 0;
 }
 
@@ -229,8 +234,10 @@ int main(int argc, char **argv) {
         .audio_file = NULL,
         .pi = 0x00ff,
         .ecc = 0x0,
+        .lic = 0x0, // Added default LIC value
         .ps = "Pi-FmSa",
         .rt = "Broadcasting on a Raspberry Pi: Simply Advanced",
+        .ptyn = "OTHER",
         .control_pipe = NULL,
         .pty = 0,
         .af_array = {0},
@@ -281,12 +288,18 @@ int main(int argc, char **argv) {
         } else if(strcmp("-ecc", arg)==0 && param != NULL) {
             i++;
             data.ecc = (uint16_t)strtoul(param, NULL, 16);
+        } else if(strcmp("-lic", arg)==0 && param != NULL) { // Added LIC command-line argument parser
+            i++;
+            data.lic = (uint16_t)strtoul(param, NULL, 16);
         } else if(strcmp("-ps", arg)==0 && param != NULL) {
             i++;
             data.ps = param;
         } else if(strcmp("-rt", arg)==0 && param != NULL) {
             i++;
             data.rt = param;
+        } else if(strcmp("-ptyn", arg)==0 && param != NULL) {
+            i++;
+            data.ptyn = param;
         } else if(strcmp("-compressordecay", arg)==0 && param != NULL) {
             i++;
             data.compressor_decay = atof(param);
@@ -315,12 +328,6 @@ int main(int argc, char **argv) {
         } else if(strcmp("-gpiopin", arg)==0 && param != NULL) {
             i++;
             printf("GPIO pin setting disabled, mod librpitx and pifmsa (pifm simply advanced) for this\n");
-            // int pinnum = atoi(param);
-            // if (!(pinnum == 4 || pinnum == 20 || pinnum == 32 || pinnum == 34 || pinnum == 6)) {
-            //     fatal("Invalid gpio pin, allowed: 4, 20, 32, 34, 6");
-            // } else {
-            //     gpiopin = pinnum;
-            // }
         } else if(strcmp("-disablelogging", arg)==0) {
             i++;
             data.log = 0;
@@ -399,15 +406,14 @@ int main(int argc, char **argv) {
         }
         else {
             fatal("Unrecognised argument: %s.\n"
-            "Syntax: pi_fm_rds [-freq freq] [-audio file] [-pi pi_code] [-ecc ecc_code]\n"
-            "                  [-ps ps_text] [-rt rt_text] [-ctl control_pipe] [-pty program_type] [-raw play raw audio from stdin] [-disablerds] [-af alt freq] [-preemphasis us] [-rawchannels when using the raw option you can change this] [-rawsamplerate same business] [-deviation the deviation, default is 75000] [-tp] [-ta]\n", arg);
+            "Syntax: pi_fm_rds [-freq freq] [-audio file] [-pi pi_code] [-ecc ecc_code] [-lic lic_code]\n"
+            "                  [-ps ps_text] [-rt rt_text] [-ptyn ptyn_text] [-ctl control_pipe] [-pty program_type] [-raw play raw audio from stdin] [-disablerds] [-af alt freq] [-preemphasis us] [-rawchannels when using the raw option you can change this] [-rawsamplerate same business] [-deviation the deviation, default is 75000] [-tp] [-ta]\n", arg);
         }
     }
 
     alternative_freq[0] = af_size;
     memcpy(data.af_array, alternative_freq, sizeof(alternative_freq));
     int FifoSize=DATA_SIZE*2;
-    //fmmod=new ngfmdmasync(carrier_freq,228000,14,FifoSize, false, gpiopin); //you can mod
     fmmod=new ngfmdmasync(data.carrier_freq,228000,14,FifoSize, false);
     int errcode = tx(&data);
     terminate(errcode);
