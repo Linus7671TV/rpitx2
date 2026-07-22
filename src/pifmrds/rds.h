@@ -50,5 +50,6 @@ extern void set_rds_tp(int tp);
 extern void set_rds_ms(int ms);
 extern void set_rds_ab(int ab);
 extern void set_rds_ecc(uint16_t ecc);
+extern void set_rds_ptyn(char *ptyn);
 
 #endif /* RDS_H */
