@@ -4,6 +4,48 @@
 
     See https://github.com/Miegl/PiFmAdv
 */
+#include <fcntl.h> //[cite: 4]
+#define CONTROL_PIPE_PS_SET 1 //[cite: 4]
+#define CONTROL_PIPE_RT_SET 2 //[cite: 4]
+#define CONTROL_PIPE_TA_SET 3 //[cite: 4]
+#define CONTROL_PIPE_PTY_SET 4 //[cite: 4]
+#define CONTROL_PIPE_TP_SET 5 //[cite: 4]
+#define CONTROL_PIPE_MS_SET 6 //[cite: 4]
+#define CONTROL_PIPE_AB_SET 7 //[cite: 4]
+#define CONTROL_PIPE_PI_SET 8 //[cite: 4]
+#define CONTROL_PIPE_PWR_SET 9 //[cite: 4]
+#define CONTROL_PIPE_RDS_SET 10 //[cite: 4]
+#define CONTROL_PIPE_DEVIATION_SET 11 //[cite: 4]
+#define CONTROL_PIPE_STEREO_SET 12 //[cite: 4]
+#define CONTROL_PIPE_GAIN_SET 13 //[cite: 4]
+#define CONTROL_PIPE_COMPRESSORDECAY_SET 14 //[cite: 4]
+#define CONTROL_PIPE_COMPRESSORATTACK_SET 15 //[cite: 4]
+#define CONTROL_PIPE_CT_SET 16 //[cite: 4]
+#define CONTROL_PIPE_RDSVOL_SET 17 //[cite: 4]
+#define CONTROL_PIPE_PAUSE_SET 18 //[cite: 4]
+#define CONTROL_PIPE_MPXGEN_SET 19 //[cite: 4]
+#define CONTROL_PIPE_COMPRESSOR_SET 20 //[cite: 4]
+#define CONTROL_PIPE_COMPRESSORMAXGAINRECIP_SET 21 //[cite: 4]
+#define CONTROL_PIPE_LIMITERTHRESHOLD_SET 22 //[cite: 4]
+#define CONTROL_PIPE_GENERIC_SET 23 //[cite: 4]
+#define CONTROL_PIPE_PTYN_SET 24 //[cite: 4]
+#define CONTROL_PIPE_LIC_SET 25 //[cite: 4]
+#define CONTROL_PIPE_LPS_SET 26
+
+typedef struct {
+    int res;
+    char *arg;
+    int arg_int;
+} ResultAndArg; //[cite: 4]
+
+extern int open_control_pipe(char *filename); //[cite: 4]
+extern int close_control_pipe(); //[cite: 4]
+extern ResultAndArg poll_control_pipe(int log); //[cite: 4]/*
+    PiFmAdv - Advanced FM transmitter for the Raspberry Pi
+    Copyright (C) 2017 Miegl
+
+    See https://github.com/Miegl/PiFmAdv
+*/
 #include <fcntl.h>
 #define CONTROL_PIPE_PS_SET 1
 #define CONTROL_PIPE_RT_SET 2
