@@ -331,10 +331,8 @@ void set_rds_pi(uint16_t pi_code) {
 }
 
 void set_rds_rt(char *rt) {
-    // 1. Store clean padded ASCII to traditional RT buffer
     copy_utf8_padded(rt, rds_params.rt, RT_LENGTH);
     
-    // 2. Parse text automatically to extract RT+ semantic boundaries
     char temp_rt[65];
     int rt_len = 0;
     while(rt[rt_len] != '\0' && rt_len < 64) {
@@ -345,18 +343,14 @@ void set_rds_rt(char *rt) {
     
     char *dash = strstr(temp_rt, " - ");
     if (dash != NULL) {
-        
-        // Define Tag 2: Artist (Appears before the hyphen)
-        rt_tag2_type = 4; // Code 4 = Item.Artist
+        rt_tag2_type = 4;
         rt_tag2_start = 0;
         int artist_len = dash - temp_rt;
-        if (artist_len > 32) artist_len = 32; // Tag 2 length payload is strictly 5-bits max
+        if (artist_len > 32) artist_len = 32;
         
-        // Define Tag 1: Title (Appears after the hyphen)
-        rt_tag1_type = 1; // Code 1 = Item.Title
+        rt_tag1_type = 1;
         rt_tag1_start = (dash - temp_rt) + 3;
         
-        // Strip out trailing (Year) parenthesis from Title if it exists
         char *paren = strstr(dash + 3, " (");
         int title_len = 0;
         if (paren != NULL) {
@@ -365,20 +359,18 @@ void set_rds_rt(char *rt) {
             title_len = strlen(dash + 3);
         }
         
-        // Sanity check length bounding
         if (rt_tag1_start + title_len > 64) {
             title_len = 64 - rt_tag1_start;
         }
         
         if (artist_len > 0 && title_len > 0) {
-            rt_tag2_len = artist_len - 1; // Standard requires (Length - 1)
+            rt_tag2_len = artist_len - 1;
             rt_tag1_len = title_len - 1;
-            rtplus_enabled = 1;           // Fire up 3A and 11A groupings!
+            rtplus_enabled = 1;
         } else {
             rtplus_enabled = 0;
         }
     } else {
-        // Automatically kill RT+ payload if broadcasting single non-hyphenated strings
         rtplus_enabled = 0;
     }
 }
