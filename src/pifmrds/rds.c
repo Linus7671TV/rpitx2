@@ -70,6 +70,26 @@ static void copy_utf8_padded(const char *in, char *out, size_t max_len) {
     }
 }
 
+/* Copies RadioText into the output buffer, appending 0x0D (CR) at the end 
+   of the text string (if under max_len) and padding the remaining buffer with spaces. */
+static void copy_rt_padded_cr(const char *in, char *out, size_t max_len) {
+    size_t i = 0;
+    if (in) {
+        while (in[i] != '\0' && i < max_len) {
+            out[i] = in[i];
+            i++;
+        }
+    }
+    // Append 0x0D (CR) to mark end-of-text according to standard IEC 62106
+    if (i < max_len) {
+        out[i++] = 0x0D;
+    }
+    // Pad remaining buffer with spaces
+    while (i < max_len) {
+        out[i++] = ' ';
+    }
+}
+
 /* Classical CRC computation */
 uint16_t crc(uint16_t block) {
     uint16_t crc = 0;
@@ -331,7 +351,8 @@ void set_rds_pi(uint16_t pi_code) {
 }
 
 void set_rds_rt(char *rt) {
-    copy_utf8_padded(rt, rds_params.rt, RT_LENGTH);
+    // Copy RT string using new helper appending 0x0D
+    copy_rt_padded_cr(rt, rds_params.rt, RT_LENGTH);
     
     char temp_rt[65];
     int rt_len = 0;
@@ -343,28 +364,23 @@ void set_rds_rt(char *rt) {
     
     char *dash = strstr(temp_rt, " - ");
     if (dash != NULL) {
-        rt_tag2_type = 4;
+        rt_tag2_type = 4; // ITEM.ARTIST
         rt_tag2_start = 0;
         int artist_len = dash - temp_rt;
         if (artist_len > 32) artist_len = 32;
         
-        rt_tag1_type = 1;
+        rt_tag1_type = 1; // ITEM.TITLE
         rt_tag1_start = (dash - temp_rt) + 3;
         
-        char *paren = strstr(dash + 3, " (");
-        int title_len = 0;
-        if (paren != NULL) {
-            title_len = paren - (dash + 3);
-        } else {
-            title_len = strlen(dash + 3);
-        }
+        // Includes full title string with bracketed details (e.g. "(1998)", "[Remix]", etc.)
+        int title_len = strlen(dash + 3);
         
         if (rt_tag1_start + title_len > 64) {
             title_len = 64 - rt_tag1_start;
         }
         
         if (artist_len > 0 && title_len > 0) {
-            rt_tag2_len = artist_len - 1;
+            rt_tag2_len = artist_len - 1; // RT+ length field is (count - 1)
             rt_tag1_len = title_len - 1;
             rtplus_enabled = 1;
         } else {
